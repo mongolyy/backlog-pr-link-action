@@ -1,4 +1,4 @@
-![Build](https://github.com/toshimaru/backlog-pr-link-action/workflows/Build/badge.svg)
+![Build](https://github.com/mongolyy/backlog-pr-link-action/workflows/Build/badge.svg)
 
 # backlog-pr-link-action
 
