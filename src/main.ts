@@ -6,13 +6,15 @@ async function main () {
   try {
     const host = core.getInput('backlog-host', { required: true })
     const apiKey = core.getInput('backlog-api-key', { required: true })
+    const doingStatusId = core.getInput('backlog-doing-status-id', { required: false })
+    const doneStatusId = core.getInput('backlog-done-status-id', { required: false })
 
     if (context.payload.pull_request === undefined) {
       throw new Error("Can't get pull_request payload. Check you trigger pull_request event")
     }
 
     const client = new Client(host, apiKey)
-    const { html_url: prUrl = '', body = '' } = context.payload.pull_request
+    const { html_url: prUrl = '', body = '', merged = false } = context.payload.pull_request
     if (!client.containsBacklogUrl(body)) {
       core.info("Skip process since body doesn't contain backlog URL")
       return
@@ -37,6 +39,10 @@ async function main () {
 
     if (await client.updateIssuePrField(issueId, prCustomField.id, prUrl)) {
       core.info(`Pull Request (${prUrl}) has been successfully linked.`)
+    }
+
+    if (await client.updateIssueStatus(issueId, merged, Number(doingStatusId), Number(doneStatusId))) {
+      core.info(`The status of backlog task liked with Pull Request (${prUrl}) has been updated.`)
     }
   } catch (error) {
     core.setFailed(error.message)

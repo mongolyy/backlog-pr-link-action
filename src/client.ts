@@ -99,4 +99,44 @@ export class Client {
   get urlRegex (): RegExp {
     return new RegExp(`https://${this.host}/view/(\\w+)-(\\d+)`)
   }
+
+  async updateIssueStatus (
+    issueId: string,
+    isMerged: boolean,
+    doingStatusId: number,
+    doneStatusId: number
+  ): Promise<boolean> {
+    let currentIssueStatusId: number
+    try {
+      currentIssueStatusId = await this.getCurrentIssueStatus(issueId)
+    } catch (error) {
+      core.error(error.message)
+      core.warning(`Invalid IssueID: ${issueId}`)
+      return false
+    }
+
+    const nextIssueStatusId = isMerged ? doneStatusId : doingStatusId
+    if (Number.isNaN(nextIssueStatusId)) {
+      return false
+    }
+
+    if (currentIssueStatusId !== nextIssueStatusId) {
+      try {
+        this.backlog.patchIssue(issueId, { statusId: nextIssueStatusId })
+        return true
+      } catch (error) {
+        core.error(error.message)
+        return false
+      }
+    }
+
+    return false
+  }
+
+  async getCurrentIssueStatus (
+    issueId: string
+  ): Promise<number> {
+    const issue = await this.backlog.getIssue(issueId)
+    return Number(issue.status.id)
+  }
 }
