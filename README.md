@@ -22,4 +22,6 @@ jobs:
         with:
           backlog-api-key: "${{ secrets.BACKLOG_API_KEY }}"
           backlog-host: "your-org.backlog.com"
+          backlog-doing-status-id: "2"
+          backlog-done-status-id: "3"
 ```
